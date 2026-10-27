@@ -106,7 +106,7 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        triggerToast(`🚀 OTA v${version} pushed — updateAvailable flag is live!`);
+        triggerToast(`🚀 OTA v${version} pushed - updateAvailable flag is live!`);
         await loadData(true);
       } else {
         triggerToast(`⚠️ ${data?.message || 'Publish failed'}`);
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
                   <p>Central server handling backend APIs, teacher modules, and automated mobile updates.</p>
                 </div>
                 <div className={`hero-badge ${backendOk ? '' : 'hero-bad'}`}>
-                  Status: {loading ? 'Checking…' : backendOk ? 'Optimal' : 'Backend Offline'}
+                  Status: {loading ? 'Checking...' : backendOk ? 'Optimal' : 'Backend Offline'}
                 </div>
               </div>
 
@@ -204,14 +204,14 @@ export default function AdminDashboard() {
                 <span className="stat-icon">👥</span>
                 <div>
                   <p className="stat-label">Total Users</p>
-                  <h3 className="stat-val">{loading ? '…' : activeUsers.length}</h3>
+                  <h3 className="stat-val">{loading ? '...' : activeUsers.length}</h3>
                 </div>
               </div>
               <div className="stat-box">
                 <span className="stat-icon">🎓</span>
                 <div>
                   <p className="stat-label">Active Teachers</p>
-                  <h3 className="stat-val">{loading ? '…' : teachers.length}</h3>
+                  <h3 className="stat-val">{loading ? '...' : teachers.length}</h3>
                 </div>
               </div>
               <div className="stat-box clickable" onClick={() => setActiveTab('users')}>
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="stat-label">Pending Requests</p>
                   <h3 className={`stat-val ${pendingCount > 0 ? 'stat-alert' : ''}`}>
-                    {loading ? '…' : pendingCount}
+                    {loading ? '...' : pendingCount}
                   </h3>
                 </div>
               </div>
@@ -227,7 +227,7 @@ export default function AdminDashboard() {
                 <span className="stat-icon">📦</span>
                 <div>
                   <p className="stat-label">Active App Ver</p>
-                  <h3 className="stat-val">v{loading ? '…' : otaVersion}</h3>
+                  <h3 className="stat-val">v{loading ? '...' : otaVersion}</h3>
                 </div>
               </div>
             </div>
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
                     <h3>NestJS Core API</h3>
                     <span className={`pill ${backendOk ? 'gold' : 'red'}`}>{backendOk ? 'Running' : 'Offline'}</span>
                   </div>
-                  <p className="panel-desc">Backend service routing traffic between web and mobile — auth, users, uploads, OTA.</p>
+                  <p className="panel-desc">Backend service routing traffic between web and mobile - auth, users, uploads, OTA.</p>
                   <div className="panel-meta">Port: 8000 • Public via Funnel</div>
                 </div>
                 <div className="panel">
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
                     <h3>Admin Dashboard</h3>
                     <span className="pill gold">Running</span>
                   </div>
-                  <p className="panel-desc">Next.js admin panel — user approvals, verification queue and OTA deployment.</p>
+                  <p className="panel-desc">Next.js admin panel - user approvals, verification queue and OTA deployment.</p>
                   <div className="panel-meta">Port: 3000 • Funnel :8443</div>
                 </div>
               </div>
@@ -273,11 +273,11 @@ export default function AdminDashboard() {
               {/* Pending signup requests */}
               <div className="section-head">
                 <h2>Pending Signup Requests</h2>
-                <span className="pill gold">{loading ? '…' : `${pendingCount} waiting`}</span>
+                <span className="pill gold">{loading ? '...' : `${pendingCount} waiting`}</span>
               </div>
 
               {!loading && requests.length === 0 && (
-                <div className="card-box empty-box">🎉 No pending requests — every signup has been reviewed.</div>
+                <div className="card-box empty-box">🎉 No pending requests - every signup has been reviewed.</div>
               )}
 
               <div className="request-stack">
@@ -436,7 +436,7 @@ export default function AdminDashboard() {
               </div>
               <div className="card-box">
                 <p className="box-desc">
-                  Publish a new app version so the mobile app reports “update available”.
+                  Publish a new app version so the mobile app reports "update available".
                   Current live version: <strong>v{otaVersion}</strong>. The actual bundle is served by the next APK build.
                 </p>
                 <form onSubmit={handlePublishOTA} className="form-stack">
@@ -470,7 +470,7 @@ export default function AdminDashboard() {
                 <h2>Platform Settings</h2>
               </div>
               <div className="card-box">
-                <p className="box-desc">Local server configuration — change the admin key here (stored in this browser).</p>
+                <p className="box-desc">Local server configuration - change the admin key here (stored in this browser).</p>
                 <div className="form-stack">
                   <div className="field">
                     <label>Admin Key</label>
