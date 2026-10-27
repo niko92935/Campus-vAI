@@ -408,6 +408,20 @@ class OtaController {
     // current bundle a client reports (sent as ?clientVersion=)
     const clientVersion = String(req.query?.clientVersion || '0.0.0');
     const updateAvailable = semverGt(latest, clientVersion);
+    // log every check so we can see exactly which versions phones report
+    try {
+      const agent =
+        String(req.headers?.['user-agent'] || '-') +
+        (String(req.headers?.['x-forwarded-for'] || '')
+          ? ` via ${req.headers['x-forwarded-for']}`
+          : '');
+      fs.appendFileSync(
+        path.join(__dirname, '..', 'data', 'ota-checks.log'),
+        `${new Date().toISOString()} clientVersion=${clientVersion} ua=${agent}\n`
+      );
+    } catch {
+      // logging must never break the endpoint
+    }
     return {
       updateAvailable,
       currentVersion: latest,
