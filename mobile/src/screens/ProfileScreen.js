@@ -59,6 +59,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
 
     try {
       // 1) real OTA: expo-updates checks u.expo.dev and can apply a new JS bundle right away
+      let nativeFailNote = '';
       try {
         const check = await Updates.checkForUpdateAsync();
         if (check.isAvailable) {
@@ -70,6 +71,9 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
         }
       } catch (otaError) {
         void otaError; // native path unavailable (web / no config) - fall back below
+        nativeFailNote = Updates.isEnabled
+          ? ' (EAS update check failed - showing server status instead.)'
+          : ' (Native updater not in this build - install the latest APK from the school office to enable OTA.)';
       }
 
       // 2) server status banner (informational)
@@ -86,9 +90,9 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
         setOta({
           state: 'latest',
           version: result.version || APP_VERSION,
-          message: 'You are running the latest bundle. Your courses are fully synced.',
+          message: `You are running the latest bundle. Your courses are fully synced.${nativeFailNote}`,
         });
-        notify("You're on the latest version.");
+        notify(nativeFailNote ? 'No EAS update found. Native updater status is shown above.' : "You're on the latest version.");
       }
     } catch (error) {
       setLastChecked(getTimeLabel());
