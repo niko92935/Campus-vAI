@@ -92,7 +92,7 @@ export default function HomeScreen({
           <Text style={styles.greeting}>
             {getGreeting()}, {student.firstName}
           </Text>
-          <Text style={styles.greetingSub}>Let’s keep the momentum going today.</Text>
+          <Text style={styles.greetingSub}>Let's keep the momentum going today.</Text>
         </View>
 
         <Card style={styles.heroCard}>
@@ -180,7 +180,7 @@ export default function HomeScreen({
           </View>
         </TouchableOpacity>
 
-        <SectionHeader title="Today’s plan" style={styles.section} />
+        <SectionHeader title="Today's plan" style={styles.section} />
         <Card style={styles.scheduleCard}>
           {SCHEDULE.map((item, index) => (
             <TouchableOpacity
@@ -211,7 +211,7 @@ export default function HomeScreen({
               {item.status === 'live' ? (
                 <Badge label="Live" color={colors.green} background={colors.greenSoft} />
               ) : (
-                <Text style={styles.scheduleChevron}>›</Text>
+                <Text style={styles.scheduleChevron}>></Text>
               )}
             </TouchableOpacity>
           ))}
@@ -277,8 +277,8 @@ export default function HomeScreen({
         ) : null}
 
         <View style={styles.footerNote}>
-          <Text style={styles.footerSparkle}>✦</Text>
-          <Text style={styles.footerText}>One lesson at a time. You’re doing great.</Text>
+          <Text style={styles.footerSparkle}>*</Text>
+          <Text style={styles.footerText}>One lesson at a time. You're doing great.</Text>
         </View>
       </ScrollView>
 
@@ -291,7 +291,7 @@ export default function HomeScreen({
             label="Join live room"
             onPress={() => {
               setLiveOpen(false);
-              notify('Joining the live classroom as Ayesha…');
+              notify('Joining the live classroom as Ayesha...');
             }}
           />
         }

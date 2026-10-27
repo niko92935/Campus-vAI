@@ -176,7 +176,7 @@ export default function CourseDetailScreen({ course, onBack, onOpenLesson }) {
                     {lesson.type} · {lesson.duration} min
                   </Text>
                 </View>
-                <Text style={styles.lessonChevron}>›</Text>
+                <Text style={styles.lessonChevron}>></Text>
               </TouchableOpacity>
             );
           })}

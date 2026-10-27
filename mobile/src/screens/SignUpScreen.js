@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { colors, fonts, radii, softShadow } from '../theme';
 import { isValidEmail } from '../utils';
@@ -29,7 +30,7 @@ async function pickImage(side, setPicked) {
       setPicked(result.assets[0]);
     }
   } catch {
-    // permission denied or picker unavailable — keep old selection
+    // permission denied or picker unavailable - keep old selection
   }
 }
 
@@ -85,7 +86,11 @@ export default function SignUpScreen({ onBack, onSubmitted }) {
     setLoading(false);
 
     if (result.ok) {
-      onSubmitted({ role, name: name.trim(), email: email.trim() });
+      Alert.alert(
+        'Request submitted',
+        'Thank you! Your account request has been sent to your school admin. We will confirm you via email once it is approved.',
+        [{ text: 'OK', onPress: () => onSubmitted({ role, name: name.trim(), email: email.trim() }) }]
+      );
       return;
     }
     setError(result.message);
@@ -260,7 +265,7 @@ export default function SignUpScreen({ onBack, onSubmitted }) {
           {/* ID card uploads */}
           <View style={styles.idBlock}>
             <Text style={styles.idHeading}>ID CARD VERIFICATION (REQUIRED)</Text>
-            <Text style={styles.idHint}>Upload both sides — your admin inspects these before approval.</Text>
+            <Text style={styles.idHint}>Upload both sides - your admin inspects these before approval.</Text>
             <View style={styles.idRow}>
               {[
                 { side: 'front', label: 'Front', picked: idCardFront, setPicked: setFront },
@@ -280,7 +285,7 @@ export default function SignUpScreen({ onBack, onSubmitted }) {
                     </>
                   ) : (
                     <>
-                      <Text style={styles.idIcon}>🪪</Text>
+                      <Text style={styles.idIcon}>💳</Text>
                       <Text style={styles.idName}>{item.label} side</Text>
                       <Text style={styles.idAction}>Tap to upload</Text>
                     </>

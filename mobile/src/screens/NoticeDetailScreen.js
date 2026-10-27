@@ -99,7 +99,7 @@ export default function NoticeDetailScreen({ notice, onBack, notify }) {
           <TouchableOpacity
             accessibilityRole="button"
             activeOpacity={0.7}
-            onPress={() => notify('Opening a message to the student office…')}
+            onPress={() => notify('Opening a message to the student office...')}
           >
             <Text style={styles.helpAction}>Contact office →</Text>
           </TouchableOpacity>

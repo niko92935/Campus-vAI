@@ -176,7 +176,7 @@ export function ScreenHeader({ title, onBack, right, style }) {
   );
 }
 
-export function EmptyState({ icon = '✦', title, message, actionLabel, onAction }) {
+export function EmptyState({ icon = '*', title, message, actionLabel, onAction }) {
   return (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
@@ -208,7 +208,7 @@ export function ListRow({ icon, title, subtitle, onPress, right, showChevron = t
         {subtitle ? <Text style={styles.listSubtitle}>{subtitle}</Text> : null}
       </View>
       {right}
-      {onPress && showChevron ? <Text style={styles.chevron}>›</Text> : null}
+      {onPress && showChevron ? <Text style={styles.chevron}>></Text> : null}
     </>
   );
 

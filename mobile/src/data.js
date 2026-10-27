@@ -237,11 +237,11 @@ export const COURSES = [
         duration: 23,
         completed: true,
         summary:
-          'Newton’s three laws explain why objects stay still, speed up, slow down or change direction. We test them with everyday examples.',
+          "Newton's three laws explain why objects stay still, speed up, slow down or change direction. We test them with everyday examples.",
         takeaways: [
           'Draw complete free-body diagrams.',
           'Apply F = ma to systems with multiple forces.',
-          'Identify action–reaction pairs.',
+          'Identify action-reaction pairs.',
         ],
       },
       {
@@ -269,7 +269,7 @@ export const COURSES = [
         takeaways: [
           'Apply conservation of momentum in one dimension.',
           'Distinguish elastic from inelastic collisions.',
-          'Interpret impulse from a force–time graph.',
+          'Interpret impulse from a force-time graph.',
         ],
       },
       {
@@ -307,10 +307,10 @@ export const COURSES = [
         duration: 22,
         completed: false,
         summary:
-          'A changing magnetic flux induces an electromotive force. We connect Faraday’s law to generators and transformers.',
+          "A changing magnetic flux induces an electromotive force. We connect Faraday's law to generators and transformers.",
         takeaways: [
           'Calculate magnetic flux through a surface.',
-          'Apply Faraday’s and Lenz’s laws qualitatively.',
+          "Apply Faraday's and Lenz's laws qualitatively.",
           'Explain the principle of an AC generator.',
         ],
       },
@@ -408,11 +408,11 @@ export const COURSES = [
         duration: 19,
         completed: true,
         summary:
-          'Chemical reactions exchange energy with their surroundings. We measure enthalpy changes and apply Hess’s law.',
+          "Chemical reactions exchange energy with their surroundings. We measure enthalpy changes and apply Hess's law.",
         takeaways: [
           'Distinguish exothermic and endothermic processes.',
           'Calculate enthalpy change from calorimetry data.',
-          'Use Hess’s law to find unknown enthalpies.',
+          "Use Hess's law to find unknown enthalpies.",
         ],
       },
       {
@@ -425,7 +425,7 @@ export const COURSES = [
           'Reversible reactions settle into a dynamic balance. We explore equilibrium constants and how conditions shift the balance.',
         takeaways: [
           'Write equilibrium expressions for homogeneous systems.',
-          'Apply Le Chatelier’s principle.',
+          "Apply Le Chatelier's principle.",
           'Calculate equilibrium concentrations from initial values.',
         ],
       },
@@ -454,7 +454,7 @@ export const COURSES = [
         takeaways: [
           'Identify nucleophiles and electrophiles.',
           'Distinguish SN1 and SN2 pathways.',
-          'Predict major products using Markovnikov’s rule.',
+          "Predict major products using Markovnikov's rule.",
         ],
       },
       {
@@ -523,7 +523,7 @@ export const COURSES = [
         duration: 18,
         completed: true,
         summary:
-          'Examine Lady Macbeth’s shifting power and guilt through key soliloquies and her relationship with her husband.',
+          "Examine Lady Macbeth's shifting power and guilt through key soliloquies and her relationship with her husband.",
         takeaways: [
           'Compare her language before and after the murder.',
           'Discuss how gender expectations shape her actions.',
@@ -720,9 +720,9 @@ export const NOTICES = [
     category: 'Academic',
     title: 'Live Physics masterclass moved to 6:30 PM',
     preview:
-      'This evening’s electromagnetism session will begin thirty minutes later than originally scheduled.',
+      "This evening's electromagnetism session will begin thirty minutes later than originally scheduled.",
     body:
-      'Ms. Nusrat Jahan’s live Physics masterclass has been moved to 6:30 PM today due to a laboratory maintenance window. The session will still be recorded and posted within two hours of finishing.\n\nJoin from the Live Class card on your home screen. If you cannot attend live, your questions can be submitted in advance through the lesson page.',
+      "Ms. Nusrat Jahan's live Physics masterclass has been moved to 6:30 PM today due to a laboratory maintenance window. The session will still be recorded and posted within two hours of finishing.\n\nJoin from the Live Class card on your home screen. If you cannot attend live, your questions can be submitted in advance through the lesson page.",
     author: 'Physics Department',
     date: 'Today · 08:05',
     read: false,
@@ -748,7 +748,7 @@ export const NOTICES = [
     preview:
       'Form a team of up to three and submit your project proposal before the end of the month.',
     body:
-      'This year’s MindLink Science Fair will take place on Saturday, 28 November in the main atrium. Projects can explore any area of science, engineering or applied mathematics.\n\nTeams of up to three students should submit a 150-word proposal outlining their question, method and expected outcome. The deadline is Friday, 30 October at 5:00 PM. Shortlisted teams will be paired with a faculty mentor.',
+      "This year's MindLink Science Fair will take place on Saturday, 28 November in the main atrium. Projects can explore any area of science, engineering or applied mathematics.\n\nTeams of up to three students should submit a 150-word proposal outlining their question, method and expected outcome. The deadline is Friday, 30 October at 5:00 PM. Shortlisted teams will be paired with a faculty mentor.",
     author: 'Student Activities',
     date: 'Yesterday · 11:15',
     read: false,

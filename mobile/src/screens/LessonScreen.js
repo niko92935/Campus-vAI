@@ -36,11 +36,11 @@ export default function LessonScreen({
 
   const handleMediaPress = () => {
     if (lesson.type === 'Video') {
-      notify('Opening the lesson player…');
+      notify('Opening the lesson player...');
     } else if (lesson.type === 'Quiz') {
-      notify('Practice quiz is ready — opening your assessment…');
+      notify('Practice quiz is ready - opening your assessment...');
     } else {
-      notify('Opening the reading view…');
+      notify('Opening the reading view...');
     }
   };
 
@@ -123,7 +123,7 @@ export default function LessonScreen({
           <TouchableOpacity
             accessibilityRole="button"
             activeOpacity={0.75}
-            onPress={() => notify('Downloading lesson slides…')}
+            onPress={() => notify('Downloading lesson slides...')}
             style={styles.resourceRow}
           >
             <View style={styles.resourceIcon}>
@@ -139,7 +139,7 @@ export default function LessonScreen({
           <TouchableOpacity
             accessibilityRole="button"
             activeOpacity={0.75}
-            onPress={() => notify('Downloading practice worksheet…')}
+            onPress={() => notify('Downloading practice worksheet...')}
             style={styles.resourceRow}
           >
             <View style={styles.resourceIcon}>
@@ -166,7 +166,7 @@ export default function LessonScreen({
           <TouchableOpacity
             accessibilityRole="button"
             activeOpacity={0.75}
-            onPress={() => notify('Opening a message to your instructor…')}
+            onPress={() => notify('Opening a message to your instructor...')}
             style={styles.askButton}
           >
             <Text style={styles.askButtonText}>Ask</Text>
@@ -215,7 +215,7 @@ export default function LessonScreen({
             icon="✓"
             onPress={() => {
               onToggleComplete(course.id, lesson.id);
-              notify('Lesson complete — your progress has been updated.');
+              notify('Lesson complete - your progress has been updated.');
             }}
           />
         )}

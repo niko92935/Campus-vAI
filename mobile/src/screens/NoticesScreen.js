@@ -37,7 +37,7 @@ export default function NoticesScreen({ notices, onOpenNotice, onMarkAllRead }) 
             <Text style={styles.eyebrow}>STAY INFORMED</Text>
             <Text style={styles.title}>Notice board</Text>
             <Text style={styles.subtitle}>
-              {unread > 0 ? `${unread} unread announcement${unread === 1 ? '' : 's'}` : 'You’re all caught up'}
+              {unread > 0 ? `${unread} unread announcement${unread === 1 ? '' : 's'}` : "You're all caught up"}
             </Text>
           </View>
           <TouchableOpacity
@@ -170,7 +170,7 @@ export default function NoticesScreen({ notices, onOpenNotice, onMarkAllRead }) 
         )}
 
         <View style={styles.footerNote}>
-          <Text style={styles.footerSparkle}>✦</Text>
+          <Text style={styles.footerSparkle}>*</Text>
           <Text style={styles.footerText}>Notices sync automatically with your school office.</Text>
         </View>
         <View style={styles.bottomSpace} />

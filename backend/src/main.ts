@@ -18,6 +18,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
+import * as nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -26,6 +27,90 @@ import { db, saveUpload, uploadsDir } from './database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'mindlink-dev-secret-change-me';
 const ADMIN_KEY = process.env.ADMIN_KEY || 'mindlink-admin-2026';
+
+/* ------------------------------------------------------------------ */
+/* Email (SMTP) - silently skipped when not configured                 */
+/* ------------------------------------------------------------------ */
+
+const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
+const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+const SMTP_USER = process.env.SMTP_USER || '';
+const SMTP_PASS = process.env.SMTP_PASS || '';
+
+const mailer = SMTP_USER && SMTP_PASS
+  ? nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+    })
+  : null;
+
+const EMAIL_FROM = process.env.EMAIL_FROM || `MindLink.AI <${SMTP_USER}>`;
+
+async function sendStatusEmail(
+  user: { email: string; name: string; role: string },
+  action: string,
+  reason: string | null
+) {
+  if (!mailer) {
+    console.log(`[email] SMTP not configured - skipped email to ${user.email} (${action})`);
+    return;
+  }
+
+  const isTeacher = user.role === 'teacher';
+  let subject: string;
+  let lines: string[];
+
+  if (action === 'approve' || action === 'reactivate') {
+    subject = action === 'approve'
+      ? 'Your MindLink.AI account has been approved'
+      : 'Your MindLink.AI account has been re-activated';
+    lines = [
+      `Hello ${user.name},`,
+      '',
+      action === 'approve'
+        ? `Great news! Your MindLink.AI ${isTeacher ? 'teacher' : 'student'} account request has been approved.`
+        : 'Your MindLink.AI account has been re-activated by the school admin.',
+      '',
+      'You can now sign in to the MindLink.AI app with your email and password:',
+      `   Email: ${user.email}`,
+      '',
+      'Welcome aboard - we will see you in class!',
+      '',
+      'MindLink.AI School Admin',
+    ];
+  } else if (action === 'reject') {
+    subject = 'Your MindLink.AI signup request was not approved';
+    lines = [
+      `Hello ${user.name},`,
+      '',
+      `Unfortunately, your MindLink.AI ${isTeacher ? 'teacher' : 'student'} signup request was not approved.`,
+      reason ? `Reason: ${reason}` : 'You may submit a new request with the correct details.',
+      '',
+      'If you believe this is a mistake, visit the school office.',
+      '',
+      'MindLink.AI School Admin',
+    ];
+  } else {
+    return; // suspend: no email
+  }
+
+  try {
+    const info = await mailer.sendMail({
+      from: EMAIL_FROM,
+      to: user.email,
+      subject,
+      text: lines.join('\n'),
+      html: lines
+        .map((l) => (l.trim() === '' ? '<br>' : `<p style="margin:4px 0">${l}</p>`))
+        .join(''),
+    });
+    console.log(`[email] ${action} notice sent to ${user.email} (${info.messageId})`);
+  } catch (err: any) {
+    console.warn(`[email] FAILED to send ${action} email to ${user.email}: ${err?.message}`);
+  }
+}
 
 function fail(status: number, message: any): never {
   throw new HttpException({ success: false, message }, status);
@@ -262,6 +347,12 @@ class UsersController {
 
     const updated = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
     console.log(`[admin] user #${user.id} -> ${action}`);
+
+    // fire-and-forget email notification (never blocks the admin response)
+    if (action === 'approve' || action === 'reject' || action === 'reactivate') {
+      sendStatusEmail(user, action, reason).catch(() => {});
+    }
+
     return { success: true, user: publicUser(updated) };
   }
 }

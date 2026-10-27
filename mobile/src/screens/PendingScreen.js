@@ -64,15 +64,21 @@ export default function PendingScreen({ request, onBackToLogin }) {
 
           <View style={styles.points}>
             <View style={styles.point}>
-              <Text style={styles.pointIcon}>🪪</Text>
+              <Text style={styles.pointIcon}>💳</Text>
               <Text style={styles.pointText}>
                 Your ID card (both sides) has been submitted for verification.
               </Text>
             </View>
             <View style={styles.point}>
+              <Text style={styles.pointIcon}>📧</Text>
+              <Text style={styles.pointText}>
+                We will confirm you via email once your admin reviews this request.
+              </Text>
+            </View>
+            <View style={styles.point}>
               <Text style={styles.pointIcon}>🔔</Text>
               <Text style={styles.pointText}>
-                Once approved, sign in with your email & password — nothing else to do.
+                Once approved, sign in with your email & password - nothing else to do.
               </Text>
             </View>
             <View style={styles.point}>

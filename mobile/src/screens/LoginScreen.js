@@ -211,7 +211,7 @@ export default function LoginScreen({ onSignIn, onGoSignUp }) {
           </TouchableOpacity>
 
           <Text style={styles.prefillNote}>
-            Sign up requests are reviewed by your school admin — student & teacher ID cards required.
+            Sign up requests are reviewed by your school admin - student & teacher ID cards required.
           </Text>
         </View>
 

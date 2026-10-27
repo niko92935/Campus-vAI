@@ -1,6 +1,10 @@
 import { Platform } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+
+/** Real app version straight from app.json (works in dev, web export and OTA bundles). */
+export const APP_VERSION = Constants.expoConfig?.version || '1.2.0';
 
 const explicitUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -165,7 +169,7 @@ export async function registerUser(form, idCardFront, idCardBack) {
 /* OTA (unchanged for the installed APK)                               */
 /* ------------------------------------------------------------------ */
 
-export async function checkForUpdate(clientVersion = '1.0.0', timeoutMs = 4500) {
+export async function checkForUpdate(clientVersion = APP_VERSION, timeoutMs = 4500) {
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = setTimeout(() => {
     if (controller) controller.abort();

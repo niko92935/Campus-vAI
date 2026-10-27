@@ -9,7 +9,7 @@ import {
   SecondaryButton,
   Sheet,
 } from '../components/UI';
-import { API_BASE_URL, checkForUpdate } from '../api';
+import { API_BASE_URL, APP_VERSION, checkForUpdate } from '../api';
 
 import * as Updates from 'expo-updates';
 import { accents, colors, fonts, radii } from '../theme';
@@ -33,7 +33,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
   const [sheet, setSheet] = useState(null);
   const [ota, setOta] = useState({
     state: 'idle',
-    version: '1.0.0',
+    version: APP_VERSION,
     message: 'Check for the latest learning bundle from your school server.',
   });
 
@@ -54,7 +54,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
     setOta((previous) => ({
       ...previous,
       state: 'checking',
-      message: 'Contacting the MindLink update server…',
+      message: 'Contacting the MindLink update server...',
     }));
 
     try {
@@ -69,35 +69,35 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
           }
         }
       } catch (otaError) {
-        void otaError; // native path unavailable (web / no config) — fall back below
+        void otaError; // native path unavailable (web / no config) - fall back below
       }
 
       // 2) server status banner (informational)
-      const result = await checkForUpdate('1.2.0');
+      const result = await checkForUpdate(APP_VERSION);
       setLastChecked(getTimeLabel());
       if (result.updateAvailable) {
         setOta({
           state: 'available',
-          version: result.version || '1.1.0',
+          version: result.version || APP_VERSION,
           message: result.message || 'A new learning bundle is ready to install.',
         });
-        notify(`Update v${result.version || '1.1.0'} is ready to install.`);
+        notify(`Update v${result.version || APP_VERSION} is ready to install.`);
       } else {
         setOta({
           state: 'latest',
-          version: result.version || '1.0.0',
+          version: result.version || APP_VERSION,
           message: 'You are running the latest bundle. Your courses are fully synced.',
         });
-        notify('You’re on the latest version.');
+        notify("You're on the latest version.");
       }
     } catch (error) {
       setLastChecked(getTimeLabel());
       setOta({
         state: 'offline',
-        version: '1.0.0',
+        version: APP_VERSION,
         message: 'Update server unavailable. Offline lessons and saved progress still work.',
       });
-      notify('Update server unavailable — running in offline mode.');
+      notify('Update server unavailable - running in offline mode.');
     } finally {
       setChecking(false);
     }
@@ -247,7 +247,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
           <Text style={styles.updateMessage}>{ota.message}</Text>
 
           <PrimaryButton
-            label={checking ? 'Checking for updates…' : 'Check for updates'}
+            label={checking ? 'Checking for updates...' : 'Check for updates'}
             loading={checking}
             compact
             onPress={handleCheckUpdate}
@@ -293,7 +293,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
 
         <View style={styles.footerNote}>
           <Text style={styles.footerBrand}>MindLink<Text style={styles.footerDot}>.AI</Text></Text>
-          <Text style={styles.footerMeta}>Student Portal v1.0.0 · Learning without limits</Text>
+          <Text style={styles.footerMeta}>Student Portal v{APP_VERSION} · Learning without limits</Text>
         </View>
         <View style={styles.bottomSpace} />
       </ScrollView>
@@ -307,7 +307,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
             label="Request a change"
             onPress={() => {
               setSheet(null);
-              notify('Opening a request with the academic office…');
+              notify('Opening a request with the academic office...');
             }}
           />
         }
@@ -334,7 +334,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
             label="Download transcript"
             onPress={() => {
               setSheet(null);
-              notify('Preparing your transcript download…');
+              notify('Preparing your transcript download...');
             }}
           />
         }
@@ -381,7 +381,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
         onClose={() => setSheet(null)}
       >
         <Text style={styles.sheetIntro}>
-          We’re here to help. Choose the team that best matches your question.
+          We're here to help. Choose the team that best matches your question.
         </Text>
         <Card style={styles.sheetMenu}>
           <ListRow
@@ -390,7 +390,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
             subtitle="Enrolment, fees and general questions"
             onPress={() => {
               setSheet(null);
-              notify('Opening a message to the student office…');
+              notify('Opening a message to the student office...');
             }}
           />
           <View style={styles.rowDivider} />
@@ -400,7 +400,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
             subtitle="Sign-in, app and device issues"
             onPress={() => {
               setSheet(null);
-              notify('Opening IT support chat…');
+              notify('Opening IT support chat...');
             }}
           />
           <View style={styles.rowDivider} />
@@ -410,7 +410,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
             subtitle="Confidential support and counselling"
             onPress={() => {
               setSheet(null);
-              notify('Opening a confidential wellbeing chat…');
+              notify('Opening a confidential wellbeing chat...');
             }}
           />
           <View style={styles.rowDivider} />
@@ -420,7 +420,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
             subtitle="24/7 · +880 9612 000 482"
             showChevron={false}
             right={<Text style={styles.callAction}>Call</Text>}
-            onPress={() => notify('Calling the student support line…')}
+            onPress={() => notify('Calling the student support line...')}
           />
         </Card>
         <Text style={styles.sheetFootnote}>
@@ -451,7 +451,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
           icon="📥"
           title="Download my data"
           subtitle="Request a copy of your activity"
-          onPress={() => notify('Preparing your data export…')}
+          onPress={() => notify('Preparing your data export...')}
         />
         <ListRow
           icon="🗑"
@@ -476,16 +476,16 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
           <Text style={styles.aboutName}>
             MindLink<Text style={styles.footerDot}>.AI</Text>
           </Text>
-          <Text style={styles.aboutVersion}>Student Portal · Version 1.0.0</Text>
+          <Text style={styles.aboutVersion}>Student Portal · Version {APP_VERSION}</Text>
         </View>
         <Text style={styles.aboutText}>
           MindLink is a connected learning platform for students, teachers and families. This app
           brings your courses, live classes, notices and progress into one calm, focused space.
         </Text>
         <View style={styles.aboutBullets}>
-          <Text style={styles.aboutBullet}>✦ Adaptive learning paths</Text>
-          <Text style={styles.aboutBullet}>✦ Live classes and recordings</Text>
-          <Text style={styles.aboutBullet}>✦ Instant OTA updates from your school server</Text>
+          <Text style={styles.aboutBullet}>* Adaptive learning paths</Text>
+          <Text style={styles.aboutBullet}>* Live classes and recordings</Text>
+          <Text style={styles.aboutBullet}>* Instant OTA updates from your school server</Text>
         </View>
         <Text style={styles.sheetFootnote}>
           © 2026 MindLink.AI · Built for curious minds.
@@ -513,7 +513,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
         }
       >
         <Text style={styles.sheetIntro}>
-          You’ll need to sign in again to access your courses and saved progress. Your work is
+          You'll need to sign in again to access your courses and saved progress. Your work is
           already synced.
         </Text>
         <View style={styles.signedInAs}>

@@ -60,7 +60,7 @@ export default function CoursesScreen({ courses, onOpenCourse }) {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search courses, topics, teachers…"
+            placeholder="Search courses, topics, teachers..."
             placeholderTextColor={colors.textDim}
             style={styles.searchInput}
             autoCapitalize="none"
@@ -171,9 +171,9 @@ export default function CoursesScreen({ courses, onOpenCourse }) {
 
                   <View style={styles.courseFooter}>
                     <Text style={styles.courseNext} numberOfLines={1}>
-                      {isComplete ? 'All lessons complete ✦' : `Next · ${nextLesson ? nextLesson.title : 'Review'}`}
+                      {isComplete ? 'All lessons complete *' : `Next · ${nextLesson ? nextLesson.title : 'Review'}`}
                     </Text>
-                    <Text style={styles.courseChevron}>›</Text>
+                    <Text style={styles.courseChevron}>></Text>
                   </View>
                 </Card>
               </TouchableOpacity>
