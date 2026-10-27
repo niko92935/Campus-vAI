@@ -18,10 +18,13 @@ import LessonScreen from './src/screens/LessonScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import NoticeDetailScreen from './src/screens/NoticeDetailScreen';
 import NoticesScreen from './src/screens/NoticesScreen';
+import PendingScreen from './src/screens/PendingScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
-import { COURSES, NOTICES, STUDENT } from './src/data';
+import SignUpScreen from './src/screens/SignUpScreen';
+import { COURSES, NOTICES } from './src/data';
 import { colors, radii, shadow } from './src/theme';
 import { getTimeLabel } from './src/utils';
+import { clearSession, loadSession, saveSession, toStudent } from './src/api';
 
 function FallbackScreen({ onBack }) {
   return (
@@ -39,7 +42,10 @@ export default function App() {
   const { width } = useWindowDimensions();
   const showFrame = Platform.OS === 'web' && width > 560;
 
-  const [session, setSession] = useState(STUDENT);
+  const [student, setStudent] = useState(null);
+  const [booting, setBooting] = useState(true);
+  const [authView, setAuthView] = useState('login'); // 'login' | 'signup'
+  const [pendingReq, setPendingReq] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
   const [stack, setStack] = useState([]);
   const [courses, setCourses] = useState(COURSES);
@@ -52,6 +58,24 @@ export default function App() {
   useEffect(() => {
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
+
+  // restore saved session (or a pending signup request) on launch
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const saved = await loadSession();
+      if (!alive) return;
+      if (saved?.status === 'pending') {
+        setPendingReq(saved.request || { email: saved.email });
+      } else if (saved?.status === 'active' && saved.token && saved.user) {
+        setStudent(toStudent(saved.user));
+      }
+      setBooting(false);
+    })();
+    return () => {
+      alive = false;
     };
   }, []);
 
@@ -143,18 +167,39 @@ export default function App() {
     );
   };
 
-  const handleSignIn = () => {
-    setSession(STUDENT);
+  const handleSignIn = ({ token, user, remember }) => {
+    const mapped = toStudent(user);
+    setStudent(mapped);
     setStack([]);
     setActiveTab('home');
-    notify(`Welcome back, ${STUDENT.firstName}.`);
+    notify(`Welcome back, ${mapped.firstName}.`);
+
+    if (remember) {
+      saveSession({ status: 'active', token, user });
+    } else {
+      clearSession();
+    }
   };
 
   const handleSignOut = () => {
-    setSession(null);
+    clearSession();
+    setStudent(null);
+    setPendingReq(null);
+    setAuthView('login');
     setStack([]);
     setActiveTab('home');
     notify('You have been signed out.');
+  };
+
+  const handleSignupSubmitted = (request) => {
+    setPendingReq(request);
+    saveSession({ status: 'pending', request });
+  };
+
+  const handleBackToLogin = () => {
+    clearSession();
+    setPendingReq(null);
+    setAuthView('login');
   };
 
   const top = stack[stack.length - 1];
@@ -163,14 +208,43 @@ export default function App() {
   let content = null;
   let showNav = false;
 
-  if (!session) {
-    content = <LoginScreen onSignIn={handleSignIn} />;
+  if (booting) {
+    content = (
+      <View style={styles.boot}>
+        <View style={styles.bootLogo}>
+          <Text style={styles.bootLogoText}>M</Text>
+        </View>
+      </View>
+    );
+  } else if (!student) {
+    if (authView === 'signup') {
+      content = (
+        <SignUpScreen
+          onBack={() => setAuthView('login')}
+          onSubmitted={handleSignupSubmitted}
+        />
+      );
+    } else if (pendingReq) {
+      content = (
+        <PendingScreen request={pendingReq} onBackToLogin={handleBackToLogin} />
+      );
+    } else {
+      content = (
+        <LoginScreen
+          onSignIn={handleSignIn}
+          onGoSignUp={() => {
+            setPendingReq(null);
+            setAuthView('signup');
+          }}
+        />
+      );
+    }
   } else if (!top) {
     showNav = true;
     if (activeTab === 'home') {
       content = (
         <HomeScreen
-          student={session}
+          student={student}
           courses={courses}
           notices={notices}
           onOpenCourse={openCourse}
@@ -195,7 +269,7 @@ export default function App() {
     } else {
       content = (
         <ProfileScreen
-          student={session}
+          student={student}
           courses={courses}
           onSignOut={handleSignOut}
           notify={notify}
@@ -304,6 +378,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  boot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg,
+  },
+  bootLogo: {
+    width: 60,
+    height: 60,
+    borderRadius: 19,
+    backgroundColor: colors.goldSoft,
+    borderWidth: 1,
+    borderColor: 'rgba(212,175,55,0.38)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bootLogoText: {
+    color: colors.gold,
+    fontSize: 30,
+    fontWeight: '800',
+    letterSpacing: -1,
   },
   rootWeb: {
     paddingVertical: 16,

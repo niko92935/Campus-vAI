@@ -7,3 +7,9 @@ dist-android/
 *.log
 .DS_Store
 .env
+
+# local server data (SQLite db, ID card uploads)
+backend/data/
+
+# app binaries
+mobile/*.apk

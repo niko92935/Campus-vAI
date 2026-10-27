@@ -11,23 +11,24 @@ import {
 } from 'react-native';
 import { colors, fonts, radii, softShadow } from '../theme';
 import { isValidEmail } from '../utils';
+import { loginUser } from '../api';
 
-export default function LoginScreen({ onSignIn }) {
-  const [email, setEmail] = useState('ayesha.rahman@mindlink.ai');
-  const [password, setPassword] = useState('mindlink');
+export default function LoginScreen({ onSignIn, onGoSignUp }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [focused, setFocused] = useState(null);
   const [error, setError] = useState('');
-  const [helper, setHelper] = useState('');
+  const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     setError('');
-    setHelper('');
+    setNotice('');
 
     if (!isValidEmail(email)) {
-      setError('Enter a valid school email address.');
+      setError('Enter the email you registered with.');
       return;
     }
     if (password.trim().length < 6) {
@@ -36,10 +37,27 @@ export default function LoginScreen({ onSignIn }) {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onSignIn();
-    }, 420);
+    const result = await loginUser(email.trim().toLowerCase(), password);
+    setLoading(false);
+
+    if (result.ok) {
+      onSignIn({ token: result.token, user: result.user, remember: rememberMe });
+      return;
+    }
+
+    if (result.code === 'PENDING') {
+      setNotice('⏳ Your account is awaiting admin approval. You will be able to sign in once your school admin approves your request.');
+      return;
+    }
+    if (result.code === 'SUSPENDED') {
+      setError('This account has been suspended. Contact the school office.');
+      return;
+    }
+    if (result.code === 'REJECTED') {
+      setNotice('❌ Your signup request was rejected. You may sign up again with the correct details.');
+      return;
+    }
+    setError(result.message);
   };
 
   return (
@@ -63,20 +81,15 @@ export default function LoginScreen({ onSignIn }) {
         </View>
 
         <View style={styles.headingBlock}>
-          <View style={styles.demoRow}>
-            <Text style={styles.heading}>Welcome back.</Text>
-            <View style={styles.demoBadge}>
-              <Text style={styles.demoBadgeText}>Demo</Text>
-            </View>
-          </View>
+          <Text style={styles.heading}>Welcome back.</Text>
           <Text style={styles.subheading}>
-            Sign in to continue your courses, live classes and everything waiting for you today.
+            Sign in with your MindLink account to continue your courses, live classes and everything waiting for you today.
           </Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.field}>
-            <Text style={styles.label}>SCHOOL EMAIL</Text>
+            <Text style={styles.label}>EMAIL</Text>
             <View style={[styles.inputWrap, focused === 'email' && styles.inputWrapFocused]}>
               <Text style={styles.inputIcon}>@</Text>
               <TextInput
@@ -104,7 +117,7 @@ export default function LoginScreen({ onSignIn }) {
               <TouchableOpacity
                 accessibilityRole="button"
                 activeOpacity={0.7}
-                onPress={() => setHelper('Password resets are handled by your school office.')}
+                onPress={() => setNotice('Password resets are handled by your school office.')}
               >
                 <Text style={styles.forgot}>Forgot password?</Text>
               </TouchableOpacity>
@@ -157,7 +170,11 @@ export default function LoginScreen({ onSignIn }) {
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
-          {helper ? <Text style={styles.helperText}>{helper}</Text> : null}
+          {notice ? (
+            <View style={styles.noticeBox}>
+              <Text style={styles.noticeText}>{notice}</Text>
+            </View>
+          ) : null}
 
           <TouchableOpacity
             accessibilityRole="button"
@@ -178,35 +195,27 @@ export default function LoginScreen({ onSignIn }) {
 
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>demo access</Text>
+            <Text style={styles.dividerText}>new here?</Text>
             <View style={styles.dividerLine} />
           </View>
 
           <TouchableOpacity
             accessibilityRole="button"
             activeOpacity={0.78}
-            onPress={() => {
-              setEmail('ayesha.rahman@mindlink.ai');
-              setPassword('mindlink');
-              setError('');
-              setTimeout(handleSignIn, 60);
-            }}
-            style={styles.demoButton}
+            onPress={() => onGoSignUp && onGoSignUp()}
+            style={styles.signUpButton}
           >
-            <Text style={styles.demoButtonIcon}>👩‍🎓</Text>
-            <Text style={styles.demoButtonText}>Continue as demo student</Text>
+            <Text style={styles.signUpButtonIcon}>🎓</Text>
+            <Text style={styles.signUpButtonText}>Create a new account</Text>
+            <Text style={styles.signUpArrow}>→</Text>
           </TouchableOpacity>
 
           <Text style={styles.prefillNote}>
-            Demo credentials are pre-filled. Any valid email and a 6+ character password will work
-            in this preview.
+            Sign up requests are reviewed by your school admin — student & teacher ID cards required.
           </Text>
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            New to MindLink? Registration is managed by your school office.
-          </Text>
           <View style={styles.footerLinks}>
             <Text style={styles.footerLink}>Privacy</Text>
             <Text style={styles.footerDot}>·</Text>
@@ -293,30 +302,10 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 18,
   },
-  demoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 9,
-  },
   heading: {
     ...fonts.h1,
     fontSize: 27,
     lineHeight: 33,
-  },
-  demoBadge: {
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: radii.full,
-    backgroundColor: colors.goldSoft,
-    borderWidth: 1,
-    borderColor: 'rgba(212,175,55,0.24)',
-  },
-  demoBadgeText: {
-    color: colors.gold,
-    fontSize: 7,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
   },
   subheading: {
     ...fonts.body,
@@ -427,10 +416,19 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
   },
-  helperText: {
+  noticeBox: {
+    backgroundColor: colors.goldSoft,
+    borderWidth: 1,
+    borderColor: 'rgba(212,175,55,0.3)',
+    borderRadius: radii.sm,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  noticeText: {
     color: colors.gold,
-    fontSize: 9.5,
-    lineHeight: 14,
+    fontSize: 10,
+    fontWeight: '600',
+    lineHeight: 15,
   },
   signInButton: {
     height: 50,
@@ -477,7 +475,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
-  demoButton: {
+  signUpButton: {
     height: 46,
     borderRadius: radii.md,
     borderWidth: 1,
@@ -487,14 +485,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    paddingHorizontal: 14,
   },
-  demoButtonIcon: {
+  signUpButtonIcon: {
     fontSize: 14,
   },
-  demoButtonText: {
+  signUpButtonText: {
     color: colors.text,
     fontSize: 11.5,
     fontWeight: '700',
+    flex: 1,
+    textAlign: 'center',
+  },
+  signUpArrow: {
+    color: colors.gold,
+    fontSize: 12,
+    fontWeight: '800',
   },
   prefillNote: {
     color: colors.textDim,
@@ -507,11 +513,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
     marginTop: 26,
-  },
-  footerText: {
-    color: colors.textDim,
-    fontSize: 9.5,
-    textAlign: 'center',
   },
   footerLinks: {
     flexDirection: 'row',
