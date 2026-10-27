@@ -9,6 +9,9 @@ export const uploadsDir = path.join(dataDir, 'uploads');
 
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+const releasesDir = path.join(dataDir, 'releases');
+if (!fs.existsSync(releasesDir)) fs.mkdirSync(releasesDir, { recursive: true });
+export { releasesDir };
 
 export const db = new DatabaseSync(path.join(dataDir, 'mindlink.db'));
 
@@ -38,6 +41,21 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS ota_state (
     key TEXT PRIMARY KEY,
     value TEXT
+  );
+
+  /* server-driven content for the Flutter client (stored as JSON blobs) */
+  CREATE TABLE IF NOT EXISTS content_state (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+
+  /* latest release APK metadata served for the in-app updater */
+  CREATE TABLE IF NOT EXISTS app_releases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    version TEXT NOT NULL,
+    file TEXT NOT NULL,
+    notes TEXT,
+    publishedAt TEXT NOT NULL
   );
 `);
 

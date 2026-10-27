@@ -14,7 +14,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
@@ -23,7 +23,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 
-import { db, saveUpload, uploadsDir } from './database';
+import { db, saveUpload, uploadsDir, releasesDir } from './database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'mindlink-dev-secret-change-me';
 const ADMIN_KEY = process.env.ADMIN_KEY || 'mindlink-admin-2026';
@@ -451,8 +451,148 @@ class OtaController {
 
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/* Server-driven content (Flutter client reads everything from here)   */
+/* ------------------------------------------------------------------ */
+
+// Seed defaults live in the data folder so they stay portable for Proxmox.
+function readContentDefaults(): any {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, '..', 'data', 'content-defaults.json'), 'utf8');
+    const parsed = JSON.parse(raw);
+    return {
+      courses: parsed.courses || [],
+      notices: parsed.notices || [],
+      texts: parsed.texts || {},
+    };
+  } catch {
+    return { courses: [], notices: [], texts: {} };
+  }
+}
+
+function getContentTree(): any {
+  const seed = readContentDefaults();
+  const readKey = (key: string, fallback: any) => {
+    const row = db.prepare('SELECT value FROM content_state WHERE key = ?').get(key) as any;
+    if (!row) {
+      db.prepare('INSERT OR IGNORE INTO content_state (key, value) VALUES (?, ?)')
+        .run(key, JSON.stringify(fallback));
+      return fallback;
+    }
+    try {
+      return JSON.parse(row.value);
+    } catch {
+      return fallback;
+    }
+  };
+  return {
+    courses: readKey('courses', seed.courses),
+    notices: readKey('notices', seed.notices),
+    texts: readKey('texts', seed.texts),
+  };
+}
+
+@Controller('api/content')
+class ContentController {
+  @Get()
+  all() {
+    const tree = getContentTree();
+    return { success: true, ...tree };
+  }
+
+  @Post(':key')
+  replace(@Req() req: any, @Param('key') key: string, @Body() body: any) {
+    requireAdmin(req);
+    if (!['courses', 'notices', 'texts'].includes(String(key))) fail(400, 'Unknown content key');
+    if (body === undefined || body === null) fail(400, 'Value is required');
+    const value = key === 'texts'
+      ? { ...getContentTree().texts, ...body }
+      : body;
+    db.prepare(
+      `INSERT INTO content_state (key, value) VALUES (?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+    ).run(String(key), JSON.stringify(value));
+    console.log(`[content] ${key} updated`);
+    return { success: true, message: `${key} saved` };
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* App release APK (in-app updater for the Flutter client)             */
+/* ------------------------------------------------------------------ */
+
+@Controller('api/app')
+class AppReleasesController {
+  @Get('latest')
+  latest() {
+    const row = db
+      .prepare('SELECT * FROM app_releases ORDER BY publishedAt DESC LIMIT 1')
+      .get() as any;
+    if (!row) {
+      return { success: true, version: null, updateAvailable: false };
+    }
+    return {
+      success: true,
+      version: row.version,
+      notes: row.notes || '',
+      publishedAt: row.publishedAt,
+      updateAvailable: true,
+      url: '/api/app/apk',
+    };
+  }
+
+  @Post('publish')
+  @UseInterceptors(
+    FileInterceptor('apk', { storage: multer.memoryStorage(), limits: { fileSize: 120 * 1024 * 1024 } })
+  )
+  publish(@Req() req: any, @Body() body: any, @UploadedFiles() apkFile: any) {
+    requireAdmin(req);
+    const apk = apkFile || req.file;
+    const version = String(body?.version || '').trim();
+    if (!/^[\d.]+$/.test(version)) fail(400, 'A numeric version like 1.3.0 is required');
+    if (!apk || !/\.apk$/i.test(apk.originalname || ''))
+      fail(400, 'An .apk file is required');
+
+    const filename = `mindlink-student-v${version}.apk`;
+    fs.writeFileSync(path.join(releasesDir, filename), apk.buffer);
+    db.prepare(
+      'INSERT INTO app_releases (version, file, notes, publishedAt) VALUES (?, ?, ?, ?)'
+    ).run(version, filename, String(body?.notes || ''), new Date().toISOString());
+    console.log(`[app] release v${version} published (${filename}, ${apk.buffer.length} bytes)`);
+    return {
+      success: true,
+      message: `Release ${version} published successfully!`,
+      version,
+    };
+  }
+
+  @Get('apk')
+  serveApk(@Req() req: any, @Res() res: any) {
+    const row = db
+      .prepare('SELECT * FROM app_releases ORDER BY publishedAt DESC LIMIT 1')
+      .get() as any;
+    const full = row ? path.join(releasesDir, row.file) : '';
+    if (row && fs.existsSync(full)) {
+      res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+      res.setHeader('Content-Disposition', `attachment; filename="${row.file}"`);
+      fs.createReadStream(full).pipe(res);
+    } else {
+      res.status(404).json({ success: false, message: 'No release published yet' });
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+
 @Module({
-  controllers: [AuthController, UsersController, UploadsController, OtaController],
+  controllers: [
+    AuthController,
+    UsersController,
+    UploadsController,
+    OtaController,
+    ContentController,
+    AppReleasesController,
+  ],
 })
 class AppModule {}
 
