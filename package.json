@@ -5,7 +5,6 @@
   "private": true,
   "workspaces": [
     "backend",
-    "dashboard",
-    "mobile"
+    "dashboard"
   ]
 }
