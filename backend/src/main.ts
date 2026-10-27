@@ -389,20 +389,32 @@ class UploadsController {
 /* OTA (unchanged contract for the installed APK)                      */
 /* ------------------------------------------------------------------ */
 
+function semverGt(a, b) {
+  const pa = String(a || '0.0.0').split('.').map((n) => parseInt(n, 10) || 0);
+  const pb = String(b || '0.0.0').split('.').map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] || 0) > (pb[i] || 0)) return true;
+    if ((pa[i] || 0) < (pb[i] || 0)) return false;
+  }
+  return false;
+}
+
 @Controller('api/ota')
 class OtaController {
   @Get('check')
-  checkVersion() {
+  checkVersion(@Req() req: any) {
     const row = db.prepare(`SELECT value FROM ota_state WHERE key = 'version'`).get() as any;
     const latest = row?.value || '1.0.0';
-    const updateAvailable = latest !== '1.0.0';
+    // current bundle a client reports (sent as ?clientVersion=)
+    const clientVersion = String(req.query?.clientVersion || '0.0.0');
+    const updateAvailable = semverGt(latest, clientVersion);
     return {
       updateAvailable,
       currentVersion: latest,
       bundleUrl: '',
       message: updateAvailable
         ? `Version ${latest} is available.`
-        : 'App is up to date.',
+        : `App is up to date (installed v${clientVersion}).`,
     };
   }
 

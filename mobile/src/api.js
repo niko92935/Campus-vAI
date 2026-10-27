@@ -176,7 +176,7 @@ export async function checkForUpdate(clientVersion = APP_VERSION, timeoutMs = 45
   }, timeoutMs);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/ota/check`, {
+    const response = await fetch(`${API_BASE_URL}/api/ota/check?clientVersion=${encodeURIComponent(clientVersion)}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
       signal: controller ? controller.signal : undefined,

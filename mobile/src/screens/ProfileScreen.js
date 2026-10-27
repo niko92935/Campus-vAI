@@ -82,15 +82,13 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
       if (result.updateAvailable) {
         setOta({
           state: 'available',
-          version: result.version || APP_VERSION,
           message: result.message || 'A new learning bundle is ready to install.',
         });
         notify(`Update v${result.version || APP_VERSION} is ready to install.`);
       } else {
         setOta({
           state: 'latest',
-          version: result.version || APP_VERSION,
-          message: `You are running the latest bundle. Your courses are fully synced.${nativeFailNote}`,
+          message: `Installed v${APP_VERSION} is the latest bundle. Your courses are fully synced.${nativeFailNote}`,
         });
         notify(nativeFailNote ? 'No EAS update found. Native updater status is shown above.' : "You're on the latest version.");
       }
@@ -239,7 +237,7 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
           <View style={styles.versionRow}>
             <View>
               <Text style={styles.versionLabel}>INSTALLED VERSION</Text>
-              <Text style={styles.versionValue}>v{ota.version}</Text>
+              <Text style={styles.versionValue}>v{APP_VERSION}</Text>
             </View>
             <Text style={styles.versionDivider}>·</Text>
             <View style={styles.lastCheck}>
