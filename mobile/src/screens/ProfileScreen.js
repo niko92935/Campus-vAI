@@ -63,11 +63,12 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
       try {
         const check = await Updates.checkForUpdateAsync();
         if (check.isAvailable) {
-          const fetched = await Updates.fetchUpdateAsync();
-          if (fetched.isNew) {
-            await Updates.reloadAsync(); // restarts with the new bundle
-            return;
-          }
+          await Updates.fetchUpdateAsync();
+          // Even when the bundle was already downloaded by an earlier
+          // launch-check (fetched.isNew === false), the running bundle is not
+          // that update yet - reload so it actually applies now.
+          await Updates.reloadAsync(); // restarts with the new bundle
+          return;
         }
       } catch (otaError) {
         void otaError; // native path unavailable (web / no config) - fall back below
