@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "MindLink.AI",
+    "slug": "mindlink-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "mindlink",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#090807",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#090807"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "jsEngine": "jsc",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ai.mindlink.student"
+    },
+    "android": {
+      "package": "ai.mindlink.student",
+      "jsEngine": "jsc",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#090807"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3d872591-e7ac-4d63-9c4c-0b6d5d4979c7"
+      }
+    },
+    "owner": "kafi92935"
+  }
+}

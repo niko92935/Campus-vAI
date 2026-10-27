@@ -1,0 +1,11 @@
+{
+  "name": "mindlink-ai",
+  "version": "1.0.0",
+  "description": "MindLink.AI Platform with Dashboard, Teacher Portal, and Mobile App",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "dashboard",
+    "mobile"
+  ]
+}
