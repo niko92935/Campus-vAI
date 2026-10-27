@@ -10,6 +10,8 @@ import {
   Sheet,
 } from '../components/UI';
 import { API_BASE_URL, checkForUpdate } from '../api';
+
+import * as Updates from 'expo-updates';
 import { accents, colors, fonts, radii } from '../theme';
 import { getCompletedCount, getCourseProgress, getCourseStats } from '../data';
 import { getTimeLabel } from '../utils';
@@ -56,7 +58,22 @@ export default function ProfileScreen({ student, courses, onSignOut, notify }) {
     }));
 
     try {
-      const result = await checkForUpdate('1.0.0');
+      // 1) real OTA: expo-updates checks u.expo.dev and can apply a new JS bundle right away
+      try {
+        const check = await Updates.checkForUpdateAsync();
+        if (check.isAvailable) {
+          const fetched = await Updates.fetchUpdateAsync();
+          if (fetched.isNew) {
+            await Updates.reloadAsync(); // restarts with the new bundle
+            return;
+          }
+        }
+      } catch (otaError) {
+        void otaError; // native path unavailable (web / no config) — fall back below
+      }
+
+      // 2) server status banner (informational)
+      const result = await checkForUpdate('1.2.0');
       setLastChecked(getTimeLabel());
       if (result.updateAvailable) {
         setOta({
