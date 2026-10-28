@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide Card, Badge;
 import 'package:image_picker/image_picker.dart';
 
 import '../api.dart';
+import '../image_utils.dart';
 import '../theme.dart';
 import '../widgets.dart';
 
@@ -60,17 +61,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85, maxWidth: 1600);
     if (picked == null) {
+      if (!mounted) return;
       showToast(context, front ? 'No image selected for the front side.' : 'No image selected for the back side.');
       return;
     }
+
+    // Large photos (especially PNGs) are quietly re-encoded so the user never
+    // has to resize anything before sending the request.
+    final file = File(picked.path);
+    final prepared = await prepareIdCardImage(file);
+    if (!mounted) return;
+
     setState(() {
       if (front) {
-        idFront = File(picked.path);
+        idFront = prepared;
       } else {
-        idBack = File(picked.path);
+        idBack = prepared;
       }
     });
-    showToast(context, front ? 'Front side attached.' : 'Back side attached.');
+    final optimised = prepared.path != file.path;
+    showToast(
+      context,
+      '${front ? 'Front' : 'Back'} side attached${optimised ? ' and optimised automatically' : ''}.',
+    );
   }
 
   bool detailsValid() {
@@ -345,7 +358,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         slot(true),
         slot(false),
         const SizedBox(height: 4),
-        Text('Both sides are required for verification. jpg/png/webp up to 5MB.', style: T.tiny, textAlign: TextAlign.center),
+        Text('Both sides are required for verification. Photos are optimised automatically.', style: T.tiny, textAlign: TextAlign.center),
         const SizedBox(height: 16),
         GhostButton(label: 'Back', padding: const EdgeInsets.symmetric(vertical: 11), onPress: () => setState(() => step = 1)),
         const SizedBox(height: 8),

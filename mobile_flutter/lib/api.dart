@@ -3,13 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// App version shown everywhere and compared against the server release.
-const APP_VERSION = '1.3.0';
-const APP_BUILD = '4';
+const APP_VERSION = '1.3.1';
+const APP_BUILD = '5';
 
 /// School server (laptop funnel now, Proxmox later).
 const API_BASE_URL = 'https://niko.tailf5f9d7.ts.net';
@@ -100,6 +101,13 @@ Future<ApiResult> login(String email, String password) async {
   }
 }
 
+MediaType _imageMediaType(String path) {
+  final lower = path.toLowerCase();
+  if (lower.endsWith('.png')) return MediaType('image', 'png');
+  if (lower.endsWith('.webp')) return MediaType('image', 'webp');
+  return MediaType('image', 'jpeg');
+}
+
 Future<ApiResult> register({
   required String role,
   required String name,
@@ -119,10 +127,18 @@ Future<ApiResult> register({
       ..fields['rollNumber'] = rollNumber
       ..fields['password'] = password;
     if (idCardFront != null) {
-      req.files.add(await http.MultipartFile.fromPath('idCardFront', idCardFront.path));
+      req.files.add(await http.MultipartFile.fromPath(
+        'idCardFront',
+        idCardFront.path,
+        contentType: _imageMediaType(idCardFront.path),
+      ));
     }
     if (idCardBack != null) {
-      req.files.add(await http.MultipartFile.fromPath('idCardBack', idCardBack.path));
+      req.files.add(await http.MultipartFile.fromPath(
+        'idCardBack',
+        idCardBack.path,
+        contentType: _imageMediaType(idCardBack.path),
+      ));
     }
     final streamed = await req.send().timeout(const Duration(seconds: 60));
     final res = await http.Response.fromStream(streamed);

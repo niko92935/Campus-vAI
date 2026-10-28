@@ -24,6 +24,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 
 import { db, saveUpload, uploadsDir, releasesDir } from './database';
+import { isAllowedImage, optimiseIdCard } from './images';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'mindlink-dev-secret-change-me';
 const ADMIN_KEY = process.env.ADMIN_KEY || 'mindlink-admin-2026';
@@ -151,11 +152,6 @@ function publicUser(row: any) {
   };
 }
 
-function imageAllowed(file: any) {
-  const ok = ['image/jpeg', 'image/png', 'image/webp'];
-  return Boolean(file) && ok.includes(file.mimetype);
-}
-
 function otpToken() {
   return crypto.randomBytes(20).toString('hex');
 }
@@ -173,10 +169,10 @@ class AuthController {
         { name: 'idCardFront', maxCount: 1 },
         { name: 'idCardBack', maxCount: 1 },
       ],
-      { storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } }
+      { storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } }
     )
   )
-  register(@Body() body: any, @UploadedFiles() files: any) {
+  async register(@Body() body: any, @UploadedFiles() files: any) {
     const front = files?.idCardFront?.[0];
     const back = files?.idCardBack?.[0];
 
@@ -193,8 +189,8 @@ class AuthController {
     if (!/^[\d+\-\s()]{6,20}$/.test(phone)) fail(400, 'A valid phone number is required');
     if (!rollNumber) fail(400, role === 'student' ? 'Student / roll ID is required' : 'Teacher ID is required');
     if (password.length < 6) fail(400, 'Password must be at least 6 characters');
-    if (!imageAllowed(front)) fail(400, 'ID card front image (jpg/png/webp, max 5MB) is required');
-    if (!imageAllowed(back)) fail(400, 'ID card back image (jpg/png/webp, max 5MB) is required');
+    if (!isAllowedImage(front)) fail(400, 'Upload a JPG, PNG or WebP photo of the front of your ID card');
+    if (!isAllowedImage(back)) fail(400, 'Upload a JPG, PNG or WebP photo of the back of your ID card');
 
     const existing = db
       .prepare('SELECT id, status FROM users WHERE email = ?')
@@ -205,8 +201,28 @@ class AuthController {
       fail(409, 'An account with this email already exists');
     }
 
-    const frontName = saveUpload(front, 'front');
-    const backName = saveUpload(back, 'back');
+    // Keep ID card images small and dashboard-friendly. Old app versions may
+    // still send multi-megabyte photos, so do the reduction on the server too.
+    const [frontOptimised, backOptimised] = await Promise.all([
+      optimiseIdCard(front.buffer),
+      optimiseIdCard(back.buffer),
+    ]);
+    const frontName = saveUpload(
+      {
+        ...front,
+        buffer: frontOptimised || front.buffer,
+        originalname: frontOptimised ? 'id-card-front.jpg' : front.originalname,
+      },
+      'front'
+    );
+    const backName = saveUpload(
+      {
+        ...back,
+        buffer: backOptimised || back.buffer,
+        originalname: backOptimised ? 'id-card-back.jpg' : back.originalname,
+      },
+      'back'
+    );
     const hash = bcrypt.hashSync(password, 10);
 
     let inserted: any;
